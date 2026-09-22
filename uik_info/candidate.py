@@ -1,12 +1,10 @@
 class Candidate:
-    name: str = None
-    party: str = None
-    votes: int = None
 
     def __init__(self, candidate_data: dict):
-        self.name = candidate_data["name"] + '\n' + candidate_data["party"]
-        self.party = candidate_data["key"]
-        self.votes = candidate_data["votes"]
+        self.name: str = candidate_data["name"] + '\n' + candidate_data["party"]
+        self.party: str = candidate_data["key"]
+        self.votes: int = candidate_data["votes"]
+        self.percent: float = candidate_data["percent"]
 
     def getName(self) -> str:
         return self.name
@@ -16,3 +14,9 @@ class Candidate:
 
     def getVotes(self) -> int:
         return self.votes
+
+    def getPercent(self) -> float:
+        return self.percent
+
+    def setPercent(self, percent: float) -> None:
+        self.percent = percent

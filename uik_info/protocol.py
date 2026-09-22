@@ -1,5 +1,4 @@
 class Protocol:
-    get_turnout = lambda protocol: round((protocol[8] + protocol[9]) / protocol[0] * 100, 1)
     protocol = None
 
     LABELES = [
@@ -18,7 +17,8 @@ class Protocol:
         "Явка, %"
     ]
 
-    def __init__(self, protocol:list(int)):
+    def __init__(self, protocol:list[int | float]) -> None:
+        protocol.append(round((protocol[8] + protocol[9]) / protocol[0] * 100, 1))
         self.protocol = protocol
 
     def get_protocol(self):

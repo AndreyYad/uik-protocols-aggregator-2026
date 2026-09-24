@@ -12,7 +12,11 @@ class Uik:
         self.id = uik_data["num"]
         self.tik = uik_data["tik"]
         self.protocol = Protocol(uik_data["protocol"])
-        self.candidates = Candidates(uik_data["candidates"])
+        try:
+            self.candidates = Candidates(uik_data["candidates"])
+        except KeyError:
+            candidatesByParties = Candidates.getCandidatesByParties(uik_data["votes"])
+            self.candidates = Candidates(candidatesByParties)
 
     def getId(self) -> int:
         return self.id

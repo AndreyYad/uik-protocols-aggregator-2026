@@ -1,10 +1,14 @@
 class Candidate:
 
     def __init__(self, candidate_data: dict):
-        self.name: str = candidate_data["name"] + '\n' + candidate_data["party"]
+        self.name: str = candidate_data["name"]
         self.party: str = candidate_data["key"]
         self.votes: int = candidate_data["votes"]
-        self.percent: float = candidate_data["percent"]
+        self.percent: float
+
+        name_party = candidate_data["party"]
+        if name_party is not None:
+            self.name += '\n\n' + name_party
 
     def getName(self) -> str:
         return self.name

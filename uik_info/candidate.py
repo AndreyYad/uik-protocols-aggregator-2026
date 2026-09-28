@@ -1,6 +1,7 @@
 class Candidate:
 
     def __init__(self, candidate_data: dict):
+        self.percent = None
         self.name: str = candidate_data["name"]
         self.party: str = candidate_data["key"]
         self.votes: int = candidate_data["votes"]

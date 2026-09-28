@@ -1,123 +1,136 @@
 from openpyxl import Workbook
-from openpyxl.packaging import workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill, Border, Side, Font, Alignment
+from openpyxl.cell.cell import Cell, MergedCell
+from openpyxl.worksheet.worksheet import Worksheet
 
 from pathlib import Path
+
+from typing import cast
 
 from uik_info.protocol import LABELES
 from uik_info.uiks import Uiks
 
 from party_color import PARTY_COLOR
-from get_requests.get_requests import Requests
 
 
 class Table:
+    PROTOCOL_START_ROW = 3
+    PROTOCOL_ROWS = 13
+    TURNOUT_ROW = 15
+    CANDIDATES_START_ROW = 16
 
     def __init__(self, district: int):
+        self.uiks = None
         self.workbook : Workbook = Workbook()
-        self.active_list = self.workbook.active
-        self.active_list.title = "Одномандатники"
+        self.sheet : Worksheet = cast(Worksheet, self.workbook.active)
+        self.sheet.title = "Одномандатники"
         self.district : int = district
 
-    def paint(self, *args, percent: bool = False):
-        self.firstColumn()
-        self.secondColumn(percent)
-        self.otherColumns(percent)
+    def paint(self, percent: bool = False):
+        if self.uiks is None:
+            raise RuntimeError("UIKs not set. Call setUiks() first.")
+        self.first_column()
+        self.second_column(percent)
+        self.other_columns(percent)
         self.settings()
 
-    def createList(self, name: str):
-        self.active_list = self.workbook.create_sheet(name)
+    def create_sheet(self, name: str):
+        self.sheet = self.workbook.create_sheet(name)
 
-    def setUiks(self, uiks: Uiks):
+    def set_uiks(self, uiks: Uiks):
         self.uiks = uiks
 
-    def setHeight(self):
-        self.active_list.sheet_format.defaultRowHeight = 50
+    def set_height(self):
+        self.sheet.sheet_format.defaultRowHeight = 50
 
     def dump(self):
-
         root = Path(__file__).resolve().parent.parent
         path = root / f"tables/gosduma2026_district_{self.district}.xlsx"
 
         self.workbook.save(path)
 
 
-    def firstColumn(self):
-        self.active_list["A1"] = "УИК"
-        self.active_list["A2"] = "Район"
-        for i in range(0, 13):
-            self.active_list[f"A{3+i}"] = LABELES[i]
+    def first_column(self):
+        self.sheet.cell(row=1, column=1, value="УИК")
+        self.sheet.cell(row=2, column=1, value="Район")
+        for i in range(0, self.PROTOCOL_ROWS):
+            self.sheet.cell(row=self.PROTOCOL_START_ROW + i , column=1, value=LABELES[i])
 
         candidates = self.uiks.getListUiks()[0].getCandidates().getCandidateList()
 
         for i, candidate in enumerate(candidates):
-            cell = f"A{16 + i}"
-            self.active_list[cell] = candidates[i].getName()
-            color = PARTY_COLOR[candidates[i].getParty()]
-            self.paintCell(cell, color)
+            cell = self.sheet.cell(row=self.CANDIDATES_START_ROW + i, column=1)
+            cell.value = candidate.getName()
+            color = PARTY_COLOR[candidate.getParty()]
+            Table.paint_cell(cell, color)
 
-    def secondColumn(self, percent: bool = False):
-        self.active_list["B1"] = "Все"
+    def second_column(self, percent: bool = False):
+        self.sheet.cell(row=1, column=2, value="Все")
         sum_protocol = self.uiks.getSumProtocol().get_protocol()
         candidates = self.uiks.getListUiks()[0].getCandidates().getCandidateList()
 
-        for i in range(0, 13):
-            self.active_list[f"B{3+i}"] = sum_protocol[i]
+        for i in range(0, self.PROTOCOL_ROWS):
+            self.sheet.cell(row=self.PROTOCOL_START_ROW + i, column=2, value=sum_protocol[i])
 
-        self.active_list.cell(15, 2).number_format = "0.0%"
-        self.paintCellGradient(15, 2, '000000', sum_protocol[12], 1)
-        self.active_list.cell(15, 2).font = Font(color="FF69B4")
-
-        candidates_full = self.uiks.getCandidatesFull()
+        cell_turnout = self.sheet.cell(row=self.TURNOUT_ROW, column=2)
+        cell_turnout.number_format = "0.0%"
+        Table.paint_cell_gradient(cell_turnout, '000000', sum_protocol[self.PROTOCOL_ROWS - 1], 1)
+        cell_turnout.font = Font(color="FF69B4")
 
         all_votes = self.uiks.getSumAllVotes()
 
         for i, candidate in enumerate(candidates):
-            cell = f"B{16+i}"
+            cell = self.sheet.cell(row=self.CANDIDATES_START_ROW + i, column=2)
             votes = self.uiks.getCandidatesFull()[candidate.getName()]
-            self.paintCellGradient(16+i, 2, PARTY_COLOR[candidate.getParty()], votes / all_votes, 0.4)
+            Table.paint_cell_gradient(cell, PARTY_COLOR[candidate.getParty()], votes / all_votes, 0.4)
             if percent:
-                self.active_list[cell] = votes / all_votes
-                self.active_list[cell].number_format = "0.00%"
+                cell.number_format = "0.00%"
+                cell.value = votes / all_votes
             else:
-                self.active_list[cell] = votes
+                cell.value = votes
 
-    def otherColumns(self, percent: bool = False):
-        for i, uik in enumerate(self.uiks.getListUiks()):
-            column = 3+i
+    def other_columns(self, percent: bool = False):
+        for _idx, uik in enumerate(self.uiks.getListUiks()):
+            column = 3+_idx
             protocol = uik.getProtocol().get_protocol()
             candidates = uik.getCandidates().getCandidateList()
 
-            self.active_list.cell(row=1, column=column, value=f"УИК {uik.getId()}")
-            self.active_list.cell(row=2, column=column, value=uik.getTik())
+            self.sheet.cell(row=1, column=column, value=f"УИК {uik.getId()}")
+            self.sheet.cell(row=2, column=column, value=uik.getTik())
 
-            for i in range(0, 13):
-                self.active_list.cell(row=3+i, column=column, value=protocol[i])
-            self.active_list.cell(15, column).number_format = "0.0%"
-            self.paintCellGradient(15, column, '000000', protocol[12], 1)
-            self.active_list.cell(15, column).font = Font(color="FF69B4")
+            for i in range(0, self.PROTOCOL_ROWS):
+                self.sheet.cell(row=self.PROTOCOL_START_ROW+i, column=column, value=protocol[i])
+
+            cell_turnout = self.sheet.cell(row=self.TURNOUT_ROW, column=column)
+            cell_turnout.number_format = "0.0%"
+            Table.paint_cell_gradient(cell_turnout, '000000', protocol[self.PROTOCOL_ROWS - 1], 1)
+            cell_turnout.font = Font(color="FF69B4")
 
             for i, candidate in enumerate(candidates):
+                cell = self.sheet.cell(row=self.CANDIDATES_START_ROW + i, column=column)
                 if percent:
-                    self.active_list.cell(row=16 + i, column=column, value=candidate.getPercent())
-                    self.active_list.cell(16 + i, column).number_format = "0.00%"
+                    cell.number_format = "0.00%"
+                    cell.value = candidate.getPercent()
                 else:
-                    self.active_list.cell(row=16 + i, column=column, value=candidate.getVotes())
+                    cell.value = candidate.getVotes()
 
-                self.paintCellGradient(16 + i, column, PARTY_COLOR[candidate.getParty()], candidate.getPercent(), 0.4)
+                Table.paint_cell_gradient(cell, PARTY_COLOR[candidate.getParty()], candidate.getPercent(), 0.4)
 
+    # def _fill_turnout
 
-    def paintCell(self, cell: str, color: str):
+    @staticmethod
+    def paint_cell(cell: Cell | MergedCell, color: str):
         fill = PatternFill(
             start_color=color,
             end_color=color,
             fill_type="solid"
         )
-        self.active_list[cell].fill = fill
+        cell.fill = fill
 
-    def paintCellGradient(self, row: int, column: int, color: str, intensity: float, coeficent: float):
-        intensity = max(0.0, min(1.0, intensity)) ** coeficent
+    @staticmethod
+    def paint_cell_gradient(cell: Cell | MergedCell, color: str, intensity: float, coefficient: float):
+        intensity = max(0.0, min(1.0, intensity)) ** coefficient
 
         r = int(color[0:2], 16)
         g = int(color[2:4], 16)
@@ -134,7 +147,7 @@ class Table:
             end_color=result_color,
             fill_type="solid"
         )
-        self.active_list.cell(row=row, column=column).fill = fill
+        cell.fill = fill
 
     def settings(
         self,
@@ -151,20 +164,20 @@ class Table:
             bottom=thin
         )
 
-        for row in self.active_list.iter_rows():
+        for row in self.sheet.iter_rows():
             for cell in row:
                 cell.border = border
 
         # Ширина первого столбца
-        self.active_list.column_dimensions["A"].width = first_column_width
+        self.sheet.column_dimensions["A"].width = first_column_width
 
         # Ширина всех остальных столбцов
-        for column in range(2, self.active_list.max_column + 1):
+        for column in range(2, self.sheet.max_column + 1):
             letter = get_column_letter(column)
-            self.active_list.column_dimensions[letter].width = other_columns_width
+            self.sheet.column_dimensions[letter].width = other_columns_width
 
         # Автоматический перенос текста
-        for row in self.active_list.iter_rows():
+        for row in self.sheet.iter_rows():
             for cell in row:
                 cell.alignment = Alignment(
                     wrap_text=True,
@@ -177,7 +190,7 @@ class Table:
             color="000000"
         )
 
-        for row in self.active_list.iter_rows():
+        for row in self.sheet.iter_rows():
             # граница между A и B
             row[0].border = Border(
                 right=thick,
@@ -194,7 +207,7 @@ class Table:
                 bottom=row[1].border.bottom
             )
 
-            for row in self.active_list.iter_rows():
+            for row in self.sheet.iter_rows():
                 for cell in row:
                     cell.alignment = Alignment(
                         wrap_text=True,
@@ -202,13 +215,13 @@ class Table:
                         horizontal="center"
                     )
 
-            for column in range(2, self.active_list.max_column + 1):
+            for column in range(2, self.sheet.max_column + 1):
                 letter = get_column_letter(column)
-                self.active_list.column_dimensions[letter].width = 20
+                self.sheet.column_dimensions[letter].width = 20
 
-            for row in range(1, self.active_list.max_row + 1):
+            for row in range(1, self.sheet.max_row + 1):
                 # Смотрим, есть ли в строке длинный текст
                 max_len = 0
-                for cell in self.active_list[row]:
+                for cell in self.sheet[row]:
                     if cell.value and isinstance(cell.value, str):
                         max_len = max(max_len, len(cell.value))

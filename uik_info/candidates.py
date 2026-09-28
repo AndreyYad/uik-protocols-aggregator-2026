@@ -30,7 +30,7 @@ class Candidates:
 
         for candidate in self.list_candidates:
             try:
-                candidate.setPercent(round(candidate.votes/all_votes, 2))
+                candidate.setPercent(round(candidate.votes/all_votes, 4))
             except ZeroDivisionError:
                 candidate.setPercent(0)
 

@@ -54,6 +54,9 @@ class Uiks():
     def getSumProtocol(self) -> SumProtocol:
         return self.sum_protocol
 
+    def getSumAllVotes(self) -> int:
+        return sum(list(self.getCandidatesFull().values()))
+
     def getCandidatesFull(self) -> dict[str, int]:
         return self.candidate_full
 

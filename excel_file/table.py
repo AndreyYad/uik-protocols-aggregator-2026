@@ -20,10 +20,10 @@ class Table:
         self.active_list.title = "Одномандатники"
         self.district : int = district
 
-    def paint(self):
+    def paint(self, *args, percent: bool = False):
         self.firstColumn()
-        self.secondColumn()
-        self.otherColumns()
+        self.secondColumn(percent)
+        self.otherColumns(percent)
         self.settings()
 
     def createList(self, name: str):
@@ -57,7 +57,7 @@ class Table:
             color = PARTY_COLOR[candidates[i].getParty()]
             self.paintCell(cell, color)
 
-    def secondColumn(self):
+    def secondColumn(self, percent: bool = False):
         self.active_list["B1"] = "Все"
         sum_protocol = self.uiks.getSumProtocol().get_protocol()
         candidates = self.uiks.getListUiks()[0].getCandidates().getCandidateList()
@@ -71,15 +71,19 @@ class Table:
 
         candidates_full = self.uiks.getCandidatesFull()
 
-        all_votes = sum([candidates_full[name] for name in candidates_full.keys()])
+        all_votes = self.uiks.getSumAllVotes()
 
         for i, candidate in enumerate(candidates):
             cell = f"B{16+i}"
             votes = self.uiks.getCandidatesFull()[candidate.getName()]
-            self.paintCellGradient(16+i, 2, PARTY_COLOR[candidate.getParty()], sum_protocol[12], 0.4)
-            self.active_list[cell] = votes
+            self.paintCellGradient(16+i, 2, PARTY_COLOR[candidate.getParty()], votes / all_votes, 0.4)
+            if percent:
+                self.active_list[cell] = votes / all_votes
+                self.active_list[cell].number_format = "0.00%"
+            else:
+                self.active_list[cell] = votes
 
-    def otherColumns(self):
+    def otherColumns(self, percent: bool = False):
         for i, uik in enumerate(self.uiks.getListUiks()):
             column = 3+i
             protocol = uik.getProtocol().get_protocol()
@@ -95,7 +99,12 @@ class Table:
             self.active_list.cell(15, column).font = Font(color="FF69B4")
 
             for i, candidate in enumerate(candidates):
-                self.active_list.cell(row=16 + i, column=column, value=candidate.getVotes())
+                if percent:
+                    self.active_list.cell(row=16 + i, column=column, value=candidate.getPercent())
+                    self.active_list.cell(16 + i, column).number_format = "0.00%"
+                else:
+                    self.active_list.cell(row=16 + i, column=column, value=candidate.getVotes())
+
                 self.paintCellGradient(16 + i, column, PARTY_COLOR[candidate.getParty()], candidate.getPercent(), 0.4)
 
 

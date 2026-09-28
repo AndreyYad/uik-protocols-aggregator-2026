@@ -45,15 +45,25 @@ class Main:
         result = False
 
         if request_fed is not None and request is not None:
+            uiks = Uiks(request)
+            uiks_fed = Uiks(request_fed)
+
             table = Table(district)
 
-            table.setUiks(Uiks(request))
-
+            table.setUiks(uiks)
             table.paint()
 
             table.createList("Партии")
-            table.setUiks(Uiks(request_fed))
+            table.setUiks(uiks_fed)
             table.paint()
+
+            table.createList("Одномандатники (%)")
+            table.setUiks(uiks)
+            table.paint(percent=True)
+
+            table.createList("Партии (%)")
+            table.setUiks(uiks_fed)
+            table.paint(percent=True)
 
             table.dump()
 

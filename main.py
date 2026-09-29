@@ -58,13 +58,15 @@ class Main:
             table.set_uiks(uiks_fed)
             table.paint()
 
+            table.set_percent_mode(True)
+
             table.create_sheet("Одномандатники (%)")
             table.set_uiks(uiks)
-            table.paint(percent=True)
+            table.paint()
 
             table.create_sheet("Партии (%)")
             table.set_uiks(uiks_fed)
-            table.paint(percent=True)
+            table.paint()
 
             table.dump()
 

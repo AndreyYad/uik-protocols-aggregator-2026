@@ -21,22 +21,29 @@ class Table:
     CANDIDATES_START_ROW = 16
 
     def __init__(self, district: int):
+        self.percent_mode : bool = False
         self.uiks = None
         self.workbook : Workbook = Workbook()
         self.sheet : Worksheet = cast(Worksheet, self.workbook.active)
         self.sheet.title = "Одномандатники"
         self.district : int = district
 
-    def paint(self, percent: bool = False):
+    def paint(self):
         if self.uiks is None:
             raise RuntimeError("UIKs not set. Call setUiks() first.")
         self.first_column()
-        self.second_column(percent)
-        self.other_columns(percent)
+        self.second_column()
+        self.other_columns()
         self.settings()
 
     def create_sheet(self, name: str):
         self.sheet = self.workbook.create_sheet(name)
+
+    def set_percent_mode(self, percent_mode):
+        self.percent_mode = percent_mode
+
+    def get_percent_mode(self):
+        return self.percent_mode
 
     def set_uiks(self, uiks: Uiks):
         self.uiks = uiks
@@ -65,7 +72,7 @@ class Table:
             color = PARTY_COLOR[candidate.get_party()]
             Table.paint_cell(cell, color)
 
-    def second_column(self, percent: bool = False):
+    def second_column(self):
         self.sheet.cell(row=1, column=2, value="Все")
         sum_protocol = self.uiks.get_sum_protocol().get_protocol()
         candidates = self.uiks.get_list_uiks()[0].get_candidates().get_candidate_list()
@@ -74,9 +81,7 @@ class Table:
             self.sheet.cell(row=self.PROTOCOL_START_ROW + i, column=2, value=sum_protocol[i])
 
         cell_turnout = self.sheet.cell(row=self.TURNOUT_ROW, column=2)
-        cell_turnout.number_format = "0.0%"
-        Table.paint_cell_gradient(cell_turnout, '000000', sum_protocol[self.PROTOCOL_ROWS - 1], 1)
-        cell_turnout.font = Font(color="FF69B4")
+        Table._setting_turnout_cell(cell_turnout, sum_protocol[self.PROTOCOL_ROWS-1])
 
         all_votes = self.uiks.get_sum_all_votes()
 
@@ -84,13 +89,13 @@ class Table:
             cell = self.sheet.cell(row=self.CANDIDATES_START_ROW + i, column=2)
             votes = self.uiks.get_candidates_full()[candidate.get_name()]
             Table.paint_cell_gradient(cell, PARTY_COLOR[candidate.get_party()], votes / all_votes, 0.4)
-            if percent:
+            if self.get_percent_mode():
                 cell.number_format = "0.00%"
                 cell.value = votes / all_votes
             else:
                 cell.value = votes
 
-    def other_columns(self, percent: bool = False):
+    def other_columns(self):
         for _idx, uik in enumerate(self.uiks.get_list_uiks()):
             column = 3+_idx
             protocol = uik.get_protocol().get_protocol()
@@ -103,13 +108,11 @@ class Table:
                 self.sheet.cell(row=self.PROTOCOL_START_ROW+i, column=column, value=protocol[i])
 
             cell_turnout = self.sheet.cell(row=self.TURNOUT_ROW, column=column)
-            cell_turnout.number_format = "0.0%"
-            Table.paint_cell_gradient(cell_turnout, '000000', protocol[self.PROTOCOL_ROWS - 1], 1)
-            cell_turnout.font = Font(color="FF69B4")
+            Table._setting_turnout_cell(cell_turnout, protocol[self.PROTOCOL_ROWS-1])
 
             for i, candidate in enumerate(candidates):
                 cell = self.sheet.cell(row=self.CANDIDATES_START_ROW + i, column=column)
-                if percent:
+                if self.get_percent_mode():
                     cell.number_format = "0.00%"
                     cell.value = candidate.get_percent()
                 else:
@@ -117,7 +120,15 @@ class Table:
 
                 Table.paint_cell_gradient(cell, PARTY_COLOR[candidate.get_party()], candidate.get_percent(), 0.4)
 
-    # def _fill_turnout
+    @staticmethod
+    def _setting_turnout_cell(cell: Cell | MergedCell, percent_turnout: float):
+        cell.number_format = "0.0%"
+        Table.paint_cell_gradient(cell, '000000', percent_turnout, 1)
+        cell.font = Font(color="FF69B4")
+
+    @staticmethod
+    def _fill_candidate():
+        ...
 
     @staticmethod
     def paint_cell(cell: Cell | MergedCell, color: str):

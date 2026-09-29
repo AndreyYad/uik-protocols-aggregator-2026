@@ -4,19 +4,14 @@ from uik_info.candidates import Candidates
 class Uik:
 
     def __init__(self, uik_data: dict):
-        id: int = None
-        tik: str = None
-        protocol: Protocol = None
-        candidates: Candidates = None
-
-        self.id = uik_data["num"]
-        self.tik = uik_data["tik"]
-        self.protocol = Protocol(uik_data["protocol"])
+        self.id: int = uik_data["num"]
+        self.tik: str = uik_data["tik"]
+        self.protocol: Protocol = Protocol(uik_data["protocol"])
         try:
-            self.candidates = Candidates(uik_data["candidates"])
+            self.candidates: Candidates = Candidates(uik_data["candidates"])
         except KeyError:
             candidatesByParties = Candidates.get_candidates_by_parties(uik_data["votes"])
-            self.candidates = Candidates(candidatesByParties)
+            self.candidates: Candidates = Candidates(candidatesByParties)
 
     def get_id(self) -> int:
         return self.id

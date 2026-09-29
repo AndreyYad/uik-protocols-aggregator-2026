@@ -1,7 +1,5 @@
 from typing import Any
 
-from pip._internal.resolution.resolvelib import candidates
-
 from uik_info.candidate import Candidate
 
 PARTIES = [
@@ -19,10 +17,8 @@ PARTIES = [
 
 class Candidates:
 
-    def __init__(self, list_candidates_data: list):
-        self.list_candidates: list[Candidate] = []
-        for candidate_data in list_candidates_data:
-            self.list_candidates.append(Candidate.from_dict(candidate_data))
+    def __init__(self, list_candidates: list[Candidate]):
+        self.list_candidates: list[Candidate] = list_candidates
 
         all_votes = 0
         for candidate in self.list_candidates:
@@ -34,18 +30,26 @@ class Candidates:
             except ZeroDivisionError:
                 candidate.set_percent(0)
 
-    @staticmethod
-    def get_candidates_by_parties(votes: list[int]) -> list[dict[str, Any]]:
-        candidates = []
-        for i, party_info in enumerate(PARTIES):
-            party_data = {
-                "name": party_info[0],
-                "key": party_info[1],
-                "party": None,
-                "votes": votes[i]
-            }
-            candidates.append(party_data)
-        return candidates
+    @classmethod
+    def from_dict(cls, candidates_data: list[dict[str, Any]]):
+        list_candidates: list[Candidate] = []
+        for candidate_data in candidates_data:
+            list_candidates.append(Candidate.from_dict(candidate_data))
+        return Candidates(list_candidates)
+
+    @classmethod
+    def from_parties(cls, votes: list[int]):
+        candidates_party: list[Candidate] = []
+        for party_info_index, party_info in enumerate(PARTIES):
+            candidates_party.append(
+                Candidate(
+                    name=party_info[0],
+                    party=party_info[1],
+                    party_name="",
+                    votes=votes[party_info_index]
+                )
+            )
+        return Candidates(candidates_party)
 
     def get_candidate_list(self) -> list[Candidate]:
         return self.list_candidates

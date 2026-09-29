@@ -8,10 +8,9 @@ class Uik:
         self.tik: str = uik_data["tik"]
         self.protocol: Protocol = Protocol(uik_data["protocol"])
         try:
-            self.candidates: Candidates = Candidates(uik_data["candidates"])
+            self.candidates: Candidates = Candidates.from_dict(uik_data["candidates"])
         except KeyError:
-            candidatesByParties = Candidates.get_candidates_by_parties(uik_data["votes"])
-            self.candidates: Candidates = Candidates(candidatesByParties)
+            self.candidates: Candidates = Candidates.from_parties(uik_data["votes"])
 
     def get_id(self) -> int:
         return self.id

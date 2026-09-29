@@ -30,12 +30,12 @@ class Candidates:
 
         for candidate in self.list_candidates:
             try:
-                candidate.setPercent(round(candidate.votes/all_votes, 4))
+                candidate.set_percent(round(candidate.votes/all_votes, 4))
             except ZeroDivisionError:
-                candidate.setPercent(0)
+                candidate.set_percent(0)
 
     @staticmethod
-    def getCandidatesByParties(votes: list[int]) -> list[dict[str, Any]]:
+    def get_candidates_by_parties(votes: list[int]) -> list[dict[str, Any]]:
         candidates = []
         for i, party_info in enumerate(PARTIES):
             party_data = {
@@ -47,5 +47,5 @@ class Candidates:
             candidates.append(party_data)
         return candidates
 
-    def getCandidateList(self) -> list[Candidate]:
+    def get_candidate_list(self) -> list[Candidate]:
         return self.list_candidates

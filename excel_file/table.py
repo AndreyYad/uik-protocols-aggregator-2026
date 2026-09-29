@@ -57,18 +57,18 @@ class Table:
         for i in range(0, self.PROTOCOL_ROWS):
             self.sheet.cell(row=self.PROTOCOL_START_ROW + i , column=1, value=LABELES[i])
 
-        candidates = self.uiks.getListUiks()[0].getCandidates().getCandidateList()
+        candidates = self.uiks.get_list_uiks()[0].get_candidates().get_candidate_list()
 
         for i, candidate in enumerate(candidates):
             cell = self.sheet.cell(row=self.CANDIDATES_START_ROW + i, column=1)
-            cell.value = candidate.getName()
-            color = PARTY_COLOR[candidate.getParty()]
+            cell.value = candidate.get_name()
+            color = PARTY_COLOR[candidate.get_party()]
             Table.paint_cell(cell, color)
 
     def second_column(self, percent: bool = False):
         self.sheet.cell(row=1, column=2, value="Все")
-        sum_protocol = self.uiks.getSumProtocol().get_protocol()
-        candidates = self.uiks.getListUiks()[0].getCandidates().getCandidateList()
+        sum_protocol = self.uiks.get_sum_protocol().get_protocol()
+        candidates = self.uiks.get_list_uiks()[0].get_candidates().get_candidate_list()
 
         for i in range(0, self.PROTOCOL_ROWS):
             self.sheet.cell(row=self.PROTOCOL_START_ROW + i, column=2, value=sum_protocol[i])
@@ -78,12 +78,12 @@ class Table:
         Table.paint_cell_gradient(cell_turnout, '000000', sum_protocol[self.PROTOCOL_ROWS - 1], 1)
         cell_turnout.font = Font(color="FF69B4")
 
-        all_votes = self.uiks.getSumAllVotes()
+        all_votes = self.uiks.get_sum_all_votes()
 
         for i, candidate in enumerate(candidates):
             cell = self.sheet.cell(row=self.CANDIDATES_START_ROW + i, column=2)
-            votes = self.uiks.getCandidatesFull()[candidate.getName()]
-            Table.paint_cell_gradient(cell, PARTY_COLOR[candidate.getParty()], votes / all_votes, 0.4)
+            votes = self.uiks.get_candidates_full()[candidate.get_name()]
+            Table.paint_cell_gradient(cell, PARTY_COLOR[candidate.get_party()], votes / all_votes, 0.4)
             if percent:
                 cell.number_format = "0.00%"
                 cell.value = votes / all_votes
@@ -91,13 +91,13 @@ class Table:
                 cell.value = votes
 
     def other_columns(self, percent: bool = False):
-        for _idx, uik in enumerate(self.uiks.getListUiks()):
+        for _idx, uik in enumerate(self.uiks.get_list_uiks()):
             column = 3+_idx
-            protocol = uik.getProtocol().get_protocol()
-            candidates = uik.getCandidates().getCandidateList()
+            protocol = uik.get_protocol().get_protocol()
+            candidates = uik.get_candidates().get_candidate_list()
 
-            self.sheet.cell(row=1, column=column, value=f"УИК {uik.getId()}")
-            self.sheet.cell(row=2, column=column, value=uik.getTik())
+            self.sheet.cell(row=1, column=column, value=f"УИК {uik.get_id()}")
+            self.sheet.cell(row=2, column=column, value=uik.get_tik())
 
             for i in range(0, self.PROTOCOL_ROWS):
                 self.sheet.cell(row=self.PROTOCOL_START_ROW+i, column=column, value=protocol[i])
@@ -111,11 +111,11 @@ class Table:
                 cell = self.sheet.cell(row=self.CANDIDATES_START_ROW + i, column=column)
                 if percent:
                     cell.number_format = "0.00%"
-                    cell.value = candidate.getPercent()
+                    cell.value = candidate.get_percent()
                 else:
-                    cell.value = candidate.getVotes()
+                    cell.value = candidate.get_votes()
 
-                Table.paint_cell_gradient(cell, PARTY_COLOR[candidate.getParty()], candidate.getPercent(), 0.4)
+                Table.paint_cell_gradient(cell, PARTY_COLOR[candidate.get_party()], candidate.get_percent(), 0.4)
 
     # def _fill_turnout
 

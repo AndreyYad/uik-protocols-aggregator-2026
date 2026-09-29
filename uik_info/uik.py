@@ -15,17 +15,17 @@ class Uik:
         try:
             self.candidates = Candidates(uik_data["candidates"])
         except KeyError:
-            candidatesByParties = Candidates.getCandidatesByParties(uik_data["votes"])
+            candidatesByParties = Candidates.get_candidates_by_parties(uik_data["votes"])
             self.candidates = Candidates(candidatesByParties)
 
-    def getId(self) -> int:
+    def get_id(self) -> int:
         return self.id
 
-    def getTik(self) -> str:
+    def get_tik(self) -> str:
         return self.tik
 
-    def getProtocol(self) -> Protocol:
+    def get_protocol(self) -> Protocol:
         return self.protocol
 
-    def getCandidates(self) -> Candidates:
+    def get_candidates(self) -> Candidates:
         return self.candidates

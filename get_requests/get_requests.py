@@ -5,16 +5,16 @@ import requests
 class Requests:
 
     @staticmethod
-    def getDistrictData(districtId: int, type: str="mand"):
-        regionId = Requests.getRegionId(districtId)
+    def get_district_data(districtId: int, type: str="mand"):
+        regionId = Requests.get_region_id(districtId)
         if regionId is None:
             return None
 
-        response = Requests.getRegionData(regionId, type)
+        response = Requests.get_region_data(regionId, type)
 
         district_uiks = []
         region_uiks = response["uiks"]
-        district_uiks_num = Requests.getNumUiksDictrict(districtId, regionId)
+        district_uiks_num = Requests.get_num_uiks_district(districtId, regionId)
 
         for uik in region_uiks:
             if uik["num"] in district_uiks_num:
@@ -23,7 +23,7 @@ class Requests:
         return district_uiks
 
     @staticmethod
-    def getRegionData(regionId: int, type: str="mand"):
+    def get_region_data(regionId: int, type: str="mand"):
         url = (
             "https://pub-9b41d66c14bb4c2fa747a03654838e30.r2.dev"
             f"/data/{type}/r{regionId}.json"
@@ -45,7 +45,7 @@ class Requests:
         return result
 
     @staticmethod
-    def getRegionId(districtId: int):
+    def get_region_id(districtId: int):
         regions = json.load(open("get_requests/region_districts.json"))
         for regionId in regions.keys():
             if districtId in regions[regionId]:
@@ -53,8 +53,8 @@ class Requests:
         return None
 
     @staticmethod
-    def getNumUiksDictrict(districtId: int, regionId: int):
-        response = Requests.getRegionData(regionId, 'mand')
+    def get_num_uiks_district(districtId: int, regionId: int):
+        response = Requests.get_region_data(regionId, 'mand')
 
         uiks_id = []
 
@@ -65,14 +65,14 @@ class Requests:
         return uiks_id
 
     @staticmethod
-    def createRegionDistrictsFile(filename="region_districts.json"):
+    def create_region_districts_file(filename="region_districts.json"):
         result = {}
 
         for regionId in range(91):
             print(f"Обрабатываю регион {regionId}...")
 
             try:
-                regionData = Requests.getRegionData(regionId)
+                regionData = Requests.get_region_data(regionId)
             except (requests.RequestException, requests.JSONDecodeError) as e:
                 print(f"  Ошибка: {e}")
                 continue
@@ -100,4 +100,4 @@ class Requests:
         return result
 
 if __name__ == "__main__":
-    Requests.createRegionDistrictsFile()
+    Requests.create_region_districts_file()

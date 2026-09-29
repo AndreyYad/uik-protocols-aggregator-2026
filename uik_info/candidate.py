@@ -11,17 +11,17 @@ class Candidate:
         if name_party is not None:
             self.name += '\n\n' + name_party
 
-    def getName(self) -> str:
+    def get_name(self) -> str:
         return self.name
 
-    def getParty(self) -> str:
+    def get_party(self) -> str:
         return self.party
 
-    def getVotes(self) -> int:
+    def get_votes(self) -> int:
         return self.votes
 
-    def getPercent(self) -> float:
+    def get_percent(self) -> float:
         return self.percent
 
-    def setPercent(self, percent: float) -> None:
+    def set_percent(self, percent: float) -> None:
         self.percent = percent

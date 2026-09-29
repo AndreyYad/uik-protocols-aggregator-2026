@@ -8,7 +8,8 @@ from pathlib import Path
 
 from typing import cast
 
-from uik_info.protocol import LABELES
+from uik_info.protocol import LABELS
+from uik_info.uik import Uik
 from uik_info.uiks import Uiks
 
 from party_color import PARTY_COLOR
@@ -62,7 +63,7 @@ class Table:
         self.sheet.cell(row=1, column=1, value="УИК")
         self.sheet.cell(row=2, column=1, value="Район")
         for i in range(0, self.PROTOCOL_ROWS):
-            self.sheet.cell(row=self.PROTOCOL_START_ROW + i , column=1, value=LABELES[i])
+            self.sheet.cell(row=self.PROTOCOL_START_ROW + i, column=1, value=LABELS[i])
 
         candidates = self.uiks.get_list_uiks()[0].get_candidates().get_candidate_list()
 
@@ -74,7 +75,7 @@ class Table:
 
     def second_column(self):
         self.sheet.cell(row=1, column=2, value="Все")
-        sum_protocol = self.uiks.get_sum_protocol().get_protocol()
+        sum_protocol = self.uiks.get_sum_protocol().get_data()
         candidates = self.uiks.get_list_uiks()[0].get_candidates().get_candidate_list()
 
         for i in range(0, self.PROTOCOL_ROWS):
@@ -98,7 +99,7 @@ class Table:
     def other_columns(self):
         for _idx, uik in enumerate(self.uiks.get_list_uiks()):
             column = 3+_idx
-            protocol = uik.get_protocol().get_protocol()
+            protocol = uik.get_protocol().get_data()
             candidates = uik.get_candidates().get_candidate_list()
 
             self.sheet.cell(row=1, column=column, value=f"УИК {uik.get_id()}")

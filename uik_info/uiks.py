@@ -1,24 +1,18 @@
-from fontTools.varLib.instancer import names
-
-from uik_info.candidates import Candidates
-from uik_info.candidate import Candidate
+from uik_info.protocol import Protocol
 from uik_info.uik import Uik
-from uik_info.sum_protocol import SumProtocol
 
 class Uiks():
     def __init__(self, list_uiks_data: list[dict] | None):
         if list_uiks_data is None:
             return
 
-        self.list_uiks: list[Uik] = []
-        self.sum_protocol: SumProtocol
+        self.list_uiks: list[Uik] = [Uik(uik_data) for uik_data in list_uiks_data]
+        self.sum_protocol: Protocol = Protocol.sum([uik.get_protocol() for uik in self.list_uiks])
         self.candidate_full: dict[str, list[int]] = {}
         count = 0
 
         for uik_data in list_uiks_data:
             self.list_uiks.append(Uik(uik_data))
-
-        self.sum_protocol = SumProtocol([uik.get_protocol() for uik in self.list_uiks])
 
         for candidate_uik_info in [
             candidate
@@ -36,6 +30,8 @@ class Uiks():
 
         self.sort_candidates()
 
+        self.list_uiks = [] + self.list_uiks
+
     def sort_candidates(self):
         sorted_names = self.get_sorts_names()
 
@@ -51,7 +47,7 @@ class Uiks():
     def get_list_uiks(self) -> list[Uik]:
         return self.list_uiks
 
-    def get_sum_protocol(self) -> SumProtocol:
+    def get_sum_protocol(self) -> Protocol:
         return self.sum_protocol
 
     def get_sum_all_votes(self) -> int:

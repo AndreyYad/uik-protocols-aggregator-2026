@@ -22,9 +22,9 @@ class Candidates:
     def __init__(self, list_candidates_data: list):
         self.list_candidates: list[Candidate] = []
         for candidate_data in list_candidates_data:
-            self.list_candidates.append(Candidate(candidate_data))
+            self.list_candidates.append(Candidate.from_dict(candidate_data))
 
-        all_votes = 0;
+        all_votes = 0
         for candidate in self.list_candidates:
             all_votes += candidate.votes
 

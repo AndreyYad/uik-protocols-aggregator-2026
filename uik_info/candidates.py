@@ -2,7 +2,7 @@ from typing import Any
 
 from uik_info.candidate import Candidate
 
-PARTIES = [
+PARTIES = (
     ["ВСЕРОССИЙСКАЯ ПОЛИТИЧЕСКАЯ ПАРТИЯ \"РОДИНА\"", "other"],
     ["Всероссийская политическая партия \"ЕДИНАЯ РОССИЯ\"", "er"],
     ["КПРФ - политическая партия КОММУНИСТИЧЕСКАЯ ПАРТИЯ РОССИЙСКОЙ ФЕДЕРАЦИИ", "kprf"],
@@ -13,7 +13,7 @@ PARTIES = [
     ["Политическая партия КОММУНИСТИЧЕСКАЯ ПАРТИЯ КОММУНИСТЫ РОССИИ", "other"],
     ["Политическая партия ЛДПР – Либерально-демократическая партия России", "ldpr"],
     ["Социалистическая политическая партия СПРАВЕДЛИВАЯ РОССИЯ", "sr"]
-]
+)
 
 class Candidates:
 
@@ -31,11 +31,11 @@ class Candidates:
                 candidate.set_percent(0)
 
     @classmethod
-    def from_dict(cls, candidates_data: list[dict[str, Any]]):
+    def from_dict(cls, candidates_data: list[dict[str, Any]]) -> "Candidates":
         list_candidates: list[Candidate] = []
         for candidate_data in candidates_data:
             list_candidates.append(Candidate.from_dict(candidate_data))
-        return Candidates(list_candidates)
+        return cls(list_candidates)
 
     @classmethod
     def from_parties(cls, votes: list[int]):

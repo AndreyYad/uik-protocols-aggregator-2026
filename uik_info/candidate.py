@@ -11,12 +11,12 @@ class Candidate:
         self.percent: float | None = percent
 
     @classmethod
-    def from_dict(cls, candidate_data: dict[str, Any]):
-        return Candidate(
+    def from_dict(cls, candidate_data: dict[str, Any]) -> "Candidate":
+        return cls(
             name=candidate_data["name"],
             party=candidate_data["key"],
             party_name=candidate_data["party"],
-            votes=candidate_data["votes"],
+            votes=candidate_data["votes"]
         )
 
     def get_name(self) -> str:

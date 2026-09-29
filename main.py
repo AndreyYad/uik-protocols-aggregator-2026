@@ -37,7 +37,8 @@ class Main:
                 list_error_district.append(district)
                 print(f"Генерация таблицы по {district} округу не прошла успешно")
             print()
-        print(f"Округа, которые не удалось обработать: {list_error_district}")
+        if list_error_district:
+            print(f"Округа, которые не удалось обработать: {list_error_district}")
 
     @staticmethod
     def born_district_table(district: int=209):
